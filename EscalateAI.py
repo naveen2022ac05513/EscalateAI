@@ -17,10 +17,10 @@ except OSError:
     os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
-# Microsoft Outlook API Credentials
-CLIENT_ID = "your-client-id"
-CLIENT_SECRET = "your-client-secret"
-TENANT_ID = "your-tenant-id"
+# Microsoft Outlook API Credentials (Using environment variables for security)
+CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
+CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
+TENANT_ID = os.getenv("AZURE_TENANT_ID")
 
 # Authenticate with Microsoft Graph API
 def get_access_token():
@@ -70,15 +70,15 @@ def create_trello_card(title, description):
     query = {
         'name': title,
         'desc': description,
-        'idList': 'your-list-id',
-        'key': 'your-trello-api-key',
-        'token': 'your-trello-token'
+        'idList': os.getenv("TRELLO_LIST_ID"),
+        'key': os.getenv("TRELLO_API_KEY"),
+        'token': os.getenv("TRELLO_TOKEN")
     }
     requests.post(url, params=query)
 
 # Slack Notifications
 def send_slack_notification(message):
-    webhook_url = 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL")
     requests.post(webhook_url, json={'text': message})
 
 # Celery Task for Time-Based Escalation
