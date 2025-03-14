@@ -1,9 +1,10 @@
+streamlit
 spacy
 textblob
 requests
 msal
 celery
 pandas
-streamlit
-sqlite3
 plotly
+trello
+redis
