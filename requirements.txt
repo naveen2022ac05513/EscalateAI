@@ -3,11 +3,9 @@ spacy
 textblob
 requests
 msal
-celery
 pandas
 plotly
-trello
-redis
 py-trello
 scikit-learn
-en-core-web-sm
+redis
+celery
