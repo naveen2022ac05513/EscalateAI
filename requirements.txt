@@ -10,3 +10,4 @@ trello
 redis
 py-trello
 scikit-learn
+en-core-web-sm
