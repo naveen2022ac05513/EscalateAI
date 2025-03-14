@@ -14,9 +14,9 @@ from sklearn.ensemble import RandomForestClassifier
 nlp = spacy.load("en_core_web_sm")
 
 # Microsoft Outlook API Credentials
-CLIENT_ID = "your-client-id"
-CLIENT_SECRET = "your-client-secret"
-TENANT_ID = "your-tenant-id"
+CLIENT_ID = "8df1bf10-bf08-4ce9-8078-c387d17aa785"
+CLIENT_SECRET = "169948a0-3581-449d-9d8c-f4f54160465d"
+TENANT_ID = "f8cdef31-a31e-4b4a-93e4-5f571e91255a"
 
 # Authenticate with Microsoft Graph API
 def get_access_token():
@@ -66,15 +66,15 @@ def create_trello_card(title, description):
     query = {
         'name': title,
         'desc': description,
-        'idList': 'your-list-id',
-        'key': 'your-trello-api-key',
-        'token': 'your-trello-token'
+        'idList': 'https://trello.com/w/workspaceaf4d48b4f2eaac2450897056779961ef',
+        'key': '07ff921e5145bd19a4def0af6e5a5bb2',
+        'token': 'ATTAaae1d242278a1875a99b02a41813266a49ea8370f0d16259331edc9b0c9a0c1c399C3FE1'
     }
     requests.post(url, params=query)
 
 # Slack Notifications
 def send_slack_notification(message):
-    webhook_url = 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+    webhook_url = 'https://schneiderelec-jyk7589.slack.com/marketplace/A0F7XDUAZ-incoming-webhooks'
     requests.post(webhook_url, json={'text': message})
 
 # Celery Task for Time-Based Escalation
