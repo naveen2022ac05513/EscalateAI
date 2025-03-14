@@ -1,5 +1,6 @@
 import streamlit as st
 import spacy
+import os
 import sqlite3
 import pandas as pd
 import requests
@@ -10,8 +11,12 @@ from celery import Celery
 from trello import TrelloClient
 from sklearn.ensemble import RandomForestClassifier
 
+# Ensure the model is downloaded
+os.system("python -m spacy download en_core_web_sm")
+
 # Load spaCy NLP model
 nlp = spacy.load("en_core_web_sm")
+
 
 # Microsoft Outlook API Credentials
 CLIENT_ID = "8df1bf10-bf08-4ce9-8078-c387d17aa785"
