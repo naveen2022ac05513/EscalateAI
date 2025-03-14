@@ -9,3 +9,4 @@ plotly
 trello
 redis
 py-trello
+scikit-learn
