@@ -11,11 +11,12 @@ from trello import TrelloClient
 from sklearn.ensemble import RandomForestClassifier
 
 # Ensure spaCy model is available
+spacy_model = "en_core_web_sm"
 try:
-    nlp = spacy.load("en_core_web_sm")
+    nlp = spacy.load(spacy_model)
 except OSError:
-    os.system("python -m spacy download en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+    os.system(f"python -m spacy download {spacy_model}")
+    nlp = spacy.load(spacy_model)
 
 # Microsoft Outlook API Credentials (Using environment variables for security)
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
