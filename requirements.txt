@@ -1,11 +1,10 @@
 streamlit
-spacy==3.5.0
+spacy
+en-core-web-sm
 textblob
 requests
 msal
 pandas
 plotly
 scikit-learn
-redis
-celery
 gunicorn
