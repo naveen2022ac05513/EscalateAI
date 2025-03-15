@@ -7,7 +7,6 @@ import msal
 import os
 import subprocess
 from textblob import TextBlob
-from celery import Celery
 from sklearn.ensemble import RandomForestClassifier
 
 # Ensure spaCy model is available
@@ -26,7 +25,7 @@ TENANT_ID = os.getenv("AZURE_TENANT_ID")
 # Authenticate with Microsoft Graph API
 def get_access_token():
     if not CLIENT_ID or not CLIENT_SECRET or not TENANT_ID:
-        print("Error: Missing Azure credentials.")
+        st.error("Error: Missing Azure credentials.")
         return None
     app = msal.ConfidentialClientApplication(CLIENT_ID, authority=f"https://login.microsoftonline.com/{TENANT_ID}", client_credential=CLIENT_SECRET)
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
@@ -39,11 +38,11 @@ def fetch_emails():
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get("https://graph.microsoft.com/v1.0/me/messages", headers=headers)
         if response.status_code == 200:
-            emails = response.json()["value"]
+            emails = response.json().get("value", [])
             for msg in emails:
-                process_email(msg["subject"], msg.get("body", {}).get("content", ""))
+                process_email(msg.get("subject", "No Subject"), msg.get("body", {}).get("content", ""))
         else:
-            print("Error fetching emails:", response.text)
+            st.error(f"Error fetching emails: {response.text}")
 
 # Initialize SQLite database
 def init_db():
@@ -68,17 +67,6 @@ def log_to_database(subject, body, urgency, entities):
     conn.commit()
     conn.close()
 
-# Celery Task for Time-Based Escalation
-celery = Celery('tasks', broker='redis://localhost:6379/0')
-@celery.task
-def escalate_case(subject):
-    conn = sqlite3.connect("escalations.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM escalations WHERE subject=? AND status='Pending'", (subject,))
-    if cursor.fetchone():
-        print(f"⚠️ URGENT: Escalation not resolved: {subject}")
-    conn.close()
-
 # AI Model for Predictive Insights
 def train_escalation_model():
     try:
@@ -89,7 +77,7 @@ def train_escalation_model():
         model.fit(X, y)
         return model
     except Exception as e:
-        print("Error training model:", e)
+        st.error(f"Error training model: {e}")
         return None
 
 escalation_model = train_escalation_model()
