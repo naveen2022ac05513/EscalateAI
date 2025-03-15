@@ -1,5 +1,6 @@
 streamlit
 spacy
+en-core-web-sm
 textblob
 requests
 msal
