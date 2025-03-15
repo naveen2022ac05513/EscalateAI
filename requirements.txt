@@ -1,6 +1,5 @@
 streamlit
 spacy
-en-core-web-sm
 textblob
 requests
 msal
@@ -10,3 +9,4 @@ py-trello
 scikit-learn
 redis
 celery
+gunicorn
