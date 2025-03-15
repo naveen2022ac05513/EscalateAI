@@ -8,5 +8,3 @@ pandas
 plotly
 scikit-learn
 gunicorn
-celery
-redis
