@@ -8,6 +8,7 @@ import os
 import subprocess
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
 
 # Ensure spaCy model is available
 spacy_model = "en_core_web_sm"
@@ -31,7 +32,7 @@ def get_access_token():
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     return token['access_token'] if "access_token" in token else None
 
-# Fetch Emails from Outlook
+# Fetch Emails from Outlook (Run Only on Button Click)
 def fetch_emails():
     token = get_access_token()
     if token:
@@ -41,6 +42,7 @@ def fetch_emails():
             emails = response.json().get("value", [])
             for msg in emails:
                 process_email(msg.get("subject", "No Subject"), msg.get("body", {}).get("content", ""))
+            st.success("Emails Fetched Successfully!")
         else:
             st.error(f"Error fetching emails: {response.text}")
 
@@ -67,11 +69,17 @@ def log_to_database(subject, body, urgency, entities):
     conn.commit()
     conn.close()
 
-# AI Model for Predictive Insights
+# AI Model for Predictive Insights (Fix Encoding for "urgency")
 def train_escalation_model():
     try:
         data = pd.read_csv("escalations.csv")
-        X = data[['urgency']]
+        if data.empty:
+            return None
+
+        label_encoder = LabelEncoder()
+        data["urgency_encoded"] = label_encoder.fit_transform(data["urgency"])
+
+        X = data[['urgency_encoded']]
         y = data['status']
         model = RandomForestClassifier()
         model.fit(X, y)
@@ -84,12 +92,17 @@ escalation_model = train_escalation_model()
 
 def predict_escalation_risk(urgency):
     if escalation_model:
-        return escalation_model.predict([[urgency]])[0]
+        label_encoder = LabelEncoder()
+        urgency_encoded = label_encoder.fit_transform([urgency])[0]
+        return escalation_model.predict([[urgency_encoded]])[0]
     return "Unknown"
 
 # Streamlit UI
 st.title("EscalateAI - AI-powered Escalation Management")
-fetch_emails()
+
+if st.button("Fetch Emails"):
+    fetch_emails()
+
 email_content = st.text_area("Paste Customer Email Here")
 if st.button("Analyze Email"):
     doc = nlp(email_content)
