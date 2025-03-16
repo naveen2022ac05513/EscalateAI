@@ -1,5 +1,5 @@
 streamlit
-spacy==3.5.0
+spacy
 textblob
 requests
 msal
