@@ -1,5 +1,6 @@
 streamlit
 spacy
+spacy[en]
 textblob
 requests
 msal
