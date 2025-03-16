@@ -10,13 +10,20 @@ from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 
-# Ensure spaCy model is available before running
+import spacy
+
 spacy_model = "en_core_web_sm"
+
+# Ensure the model exists
 try:
     nlp = spacy.load(spacy_model)
 except OSError:
-    subprocess.run(["python", "-m", "spacy", "download", spacy_model], check=True)
-    nlp = spacy.load(spacy_model)
+    nlp = None
+
+if nlp is None:
+    st.error(f"Error: The spaCy model '{spacy_model}' is missing. Please add `en-core-web-sm` to `requirements.txt`.")
+    st.stop()
+
 
 # Microsoft Outlook API Credentials (Using environment variables for security)
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
