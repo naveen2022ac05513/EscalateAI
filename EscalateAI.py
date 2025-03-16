@@ -10,7 +10,7 @@ from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 
-# Ensure spaCy model is available
+# Ensure spaCy model is available before running
 spacy_model = "en_core_web_sm"
 try:
     nlp = spacy.load(spacy_model)
@@ -28,7 +28,11 @@ def get_access_token():
     if not CLIENT_ID or not CLIENT_SECRET or not TENANT_ID:
         st.error("Error: Missing Azure credentials.")
         return None
-    app = msal.ConfidentialClientApplication(CLIENT_ID, authority=f"https://login.microsoftonline.com/{TENANT_ID}", client_credential=CLIENT_SECRET)
+    app = msal.ConfidentialClientApplication(
+        CLIENT_ID, 
+        authority=f"https://login.microsoftonline.com/{TENANT_ID}", 
+        client_credential=CLIENT_SECRET
+    )
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     return token['access_token'] if "access_token" in token else None
 
@@ -46,15 +50,24 @@ def fetch_emails():
         else:
             st.error(f"Error fetching emails: {response.text}")
 
-# Initialize SQLite database
+# Initialize SQLite database before use
 def init_db():
     conn = sqlite3.connect("escalations.db")
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS escalations (id INTEGER PRIMARY KEY, subject TEXT, body TEXT, status TEXT, urgency TEXT, entities TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS escalations (
+        id INTEGER PRIMARY KEY, 
+        subject TEXT, 
+        body TEXT, 
+        status TEXT, 
+        urgency TEXT, 
+        entities TEXT
+    )''')
     conn.commit()
     conn.close()
 
-# Process Email Content
+init_db()  # Ensure DB is initialized before Streamlit starts
+
+# Process Email Content & Extract NLP Insights
 def process_email(subject, body):
     sentiment_score = TextBlob(body).sentiment.polarity
     urgency = "High" if "urgent" in body.lower() or sentiment_score < -0.5 else "Normal"
@@ -65,7 +78,8 @@ def process_email(subject, body):
 def log_to_database(subject, body, urgency, entities):
     conn = sqlite3.connect("escalations.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO escalations (subject, body, status, urgency, entities) VALUES (?, ?, ?, ?, ?)", (subject, body, "Pending", urgency, str(entities)))
+    cursor.execute("INSERT INTO escalations (subject, body, status, urgency, entities) VALUES (?, ?, ?, ?, ?)", 
+                   (subject, body, "Pending", urgency, str(entities)))
     conn.commit()
     conn.close()
 
@@ -113,6 +127,3 @@ if st.button("Analyze Email"):
 
 st.subheader("Past Escalations")
 st.dataframe(pd.read_sql_query("SELECT * FROM escalations", sqlite3.connect("escalations.db")))
-
-# Initialize database on first run
-init_db()
