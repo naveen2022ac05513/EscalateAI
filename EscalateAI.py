@@ -10,20 +10,14 @@ from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 
-import spacy
-
+# Ensure the spaCy model is installed
 spacy_model = "en_core_web_sm"
-
-# Ensure the model exists
 try:
     nlp = spacy.load(spacy_model)
 except OSError:
-    nlp = None
-
-if nlp is None:
-    st.error(f"Error: The spaCy model '{spacy_model}' is missing. Please add `en-core-web-sm` to `requirements.txt`.")
-    st.stop()
-
+    st.warning("Downloading missing spaCy model...")
+    subprocess.run(["python", "-m", "spacy", "download", spacy_model], check=True)
+    nlp = spacy.load(spacy_model)
 
 # Microsoft Outlook API Credentials (Using environment variables for security)
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
@@ -41,9 +35,9 @@ def get_access_token():
         client_credential=CLIENT_SECRET
     )
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    return token['access_token'] if "access_token" in token else None
+    return token.get('access_token')
 
-# Fetch Emails from Outlook (Run Only on Button Click)
+# Fetch Emails from Outlook
 def fetch_emails():
     token = get_access_token()
     if token:
@@ -57,7 +51,7 @@ def fetch_emails():
         else:
             st.error(f"Error fetching emails: {response.text}")
 
-# Initialize SQLite database before use
+# Initialize SQLite database
 def init_db():
     conn = sqlite3.connect("escalations.db")
     cursor = conn.cursor()
@@ -90,7 +84,7 @@ def log_to_database(subject, body, urgency, entities):
     conn.commit()
     conn.close()
 
-# AI Model for Predictive Insights (Fix Encoding for "urgency")
+# AI Model for Predictive Insights
 def train_escalation_model():
     try:
         data = pd.read_csv("escalations.csv")
