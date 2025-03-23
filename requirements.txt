@@ -1,8 +1,8 @@
 streamlit
 spacy
-sqlite3
 pandas
 requests
 msal
 textblob
 scikit-learn
+
